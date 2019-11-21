@@ -1,1 +1,1 @@
-# distribution-lock
+# distributed-lock
