@@ -50,7 +50,7 @@
         <junit.version>4.12</junit.version>
         <slf4j.version>1.6.6</slf4j.version>
         <hutool.version>5.0.6</hutool.version>
-        <apache.zookeeper.version>3.4.13</apache.zookeeper.version>
+        <apache.zookeeper.version>3.4.14</apache.zookeeper.version>
         <hutool.version>4.1.1</hutool.version>
         <powermock.version>1.7.4</powermock.version>
         <mockito.version>1.10.19</mockito.version>

@@ -86,6 +86,6 @@ Logger DistributedLockApiImpl & ZooKeeperManager:
 
 ## Example to use the distributed lock in 2 ways
 
-a) The most simple way is to use the annotation "@DistributedLock" in your java method, refer to: DistributedLockTestController和DistributedLockTestControllerTest
+a) The most simple way is to use the annotation "@DistributedLock" in your java method, refer to: DistributedLockTestController and DistributedLockTestControllerTest
 
 b) The customized way is to inject the DistributedLockApi into your spring proxy classes, then call lock() / tryLock() / unlock() methods, refer to: ZookeeperManagerTest
