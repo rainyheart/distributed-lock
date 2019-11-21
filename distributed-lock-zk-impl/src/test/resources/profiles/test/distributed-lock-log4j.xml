@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration
+    xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="STDOUT"
+        class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                value="%-d{yyyy-MM-dd HH:mm:ss} [%t] [%c]-[%p] - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="LOGFILE"
+        class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File"
+            value="/var/logs/distributedLock/${ENV_NAME}/info.log" />
+        <param name="Append" value="true" />
+        <param name="Threshold" value="INFO" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd-HH'.log'" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                value="%-d{yyyy-MM-dd HH:mm:ss} [%t] [%c]-[%p] - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="ERRORFILE"
+        class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File"
+            value="/var/logs/distributedLock/test/error.log" />
+        <param name="Append" value="true" />
+        <param name="Threshold" value="ERROR" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd-HH'.log'" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                value="%-d{yyyy-MM-dd HH:mm:ss} [%t] [%c]-[%p] - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="DistributedLockApiImplLog"
+        class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File"
+            value="/var/logs/distributedLock/test/distributedLockApiImpl.log" />
+        <param name="Append" value="true" />
+        <param name="Threshold" value="debug" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd-HH'.log'" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                value="%-d{yyyy-MM-dd HH:mm:ss} [%t] [%c]-[%p] - %m%n" />
+        </layout>
+    </appender>
+
+    <logger name="org.springframework">
+        <level value="INFO" />
+    </logger>
+
+    <logger name="org.rainyheart.api.impl.DistributedLockApiImpl">
+        <level value="info" />
+        <appender-ref ref="DistributedLockApiImplLog"></appender-ref>
+    </logger>
+
+    <root>
+        <level value="info" />
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="LOGFILE" />
+        <appender-ref ref="ERRORFILE" />
+    </root>
+
+</log4j:configuration>

@@ -21,3 +21,18 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/.project
+/.settings/
+/distributed-lock-api-facade/.classpath
+/distributed-lock-api-facade/.project
+/distributed-lock-api-facade/.settings/
+/distributed-lock-api-facade/target/
+/distributed-lock-api/.classpath
+/distributed-lock-api/.project
+/distributed-lock-api/.settings/
+/distributed-lock-api/.springBeans
+/distributed-lock-api/target/
+/distributed-lock-zk-impl/.classpath
+/distributed-lock-zk-impl/.project
+/distributed-lock-zk-impl/.settings/
+/distributed-lock-zk-impl/target/
