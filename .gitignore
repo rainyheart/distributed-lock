@@ -36,3 +36,4 @@ hs_err_pid*
 /distributed-lock-zk-impl/.project
 /distributed-lock-zk-impl/.settings/
 /distributed-lock-zk-impl/target/
+/distributed-lock-api/jacoco.exec
