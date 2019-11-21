@@ -287,7 +287,7 @@
                     <version>1.6.7</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <serverId>ossrh</serverId>
+                        <serverId>github</serverId>
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
@@ -401,10 +401,10 @@
         </pluginManagement>
 
         <plugins>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-            </plugin>
+            </plugin> -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
