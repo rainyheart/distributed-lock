@@ -190,7 +190,16 @@ public class ZooKeeperManager implements DistributedLockManager {
                 printOrLog(MSG_UNEXPECTED_EXCEPTION, e);
             }
         } else {
-            printOrLog(path + COMMER + e.getLocalizedMessage(), e);
+            if (e instanceof KeeperException) {
+                Code code = ((KeeperException) e).code();
+                // if it is node exists exception, no need to print logs because it is a very
+                // normal case to fail to get lock
+                if (!code.equals(Code.NODEEXISTS)) {
+                    printOrLog(path + COMMER + e.getLocalizedMessage(), e);
+                }
+            } else {
+                printOrLog(MSG_UNEXPECTED_EXCEPTION, e);
+            }
         }
     }
 

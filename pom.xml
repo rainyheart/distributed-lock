@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.rainyheart</groupId>
     <artifactId>distributed-lock-projects</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>distributed-lock-projects</name>
     <description>distributed-lock-projects</description>
@@ -42,8 +42,8 @@
         <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
 
         <!-- Project Internal Modules Versions -->
-        <distributed-lock-api.version>1.0.0</distributed-lock-api.version>
-        <distributed-lock-zk-impl.version>1.0.0</distributed-lock-zk-impl.version>
+        <distributed-lock-api.version>1.1.0-SNAPSHOT</distributed-lock-api.version>
+        <distributed-lock-zk-impl.version>1.1.0-SNAPSHOT</distributed-lock-zk-impl.version>
 
         <!-- 3pp versions -->
         <spring.version>5.2.1.RELEASE</spring.version>
