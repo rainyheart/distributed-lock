@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.rainyheart</groupId>
         <artifactId>distributed-lock-projects</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0</version>
     </parent>
     <artifactId>distributed-lock-zk-impl</artifactId>
     <name>distributed-lock-zk-impl</name>

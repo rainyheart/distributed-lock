@@ -1,5 +1,7 @@
 package org.rainyheart.distributed.lock.api.facade;
 
+import org.springframework.util.StringUtils;
+
 import org.rainyheart.distributed.lock.api.DistributedLockApi;
 import org.rainyheart.distributed.lock.api.Lock;
 import org.rainyheart.distributed.lock.api.LockLevel;
@@ -17,8 +19,7 @@ public class App {
     private static final String LOCK_CMD = "lock";
     private static DistributedLockApi api = null;
 
-    public static void main(String[] args)
-            throws DistributedLockException, NumberFormatException, InterruptedException {
+    public static void main(String[] args) throws DistributedLockException, NumberFormatException, InterruptedException {
         registerShutdownHook();
 
         initializeDistributedLockApi();
@@ -144,7 +145,7 @@ public class App {
     private static void checkEnvVars(String... envVars) {
         for (String envVarKey : envVars) {
             String envVar = System.getenv(envVarKey);
-            if (envVar == null || "".equals(envVar)) {
+            if (StringUtils.isEmpty(envVar)) {
                 System.err.println("Empty environment variable " + envVarKey);
                 exit1();
             }

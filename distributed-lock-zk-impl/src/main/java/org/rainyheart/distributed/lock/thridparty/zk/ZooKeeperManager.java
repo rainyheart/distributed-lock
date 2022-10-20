@@ -59,6 +59,7 @@ public class ZooKeeperManager implements DistributedLockManager {
     private static final String COMMER = ", ";
     private static final String MSG_UNEXPECTED_EXCEPTION = "Unexpected Exception!";
     private static final String MSG_UNHANDLED_KEEPER_EXCEPTION_IS_FOUND = "Unhandled KeeperException is found!";
+    private static final String MSG_NODE_EXISTS = "NodeExists!";
     private static final String MSG_UNEXPECTED_NO_AUTH_EXCEPTION_IS_FOUND_FOR_PATH = "Unexpected NoAuth exception is found for path: ";
     private static final String MSG_RECREATED_THE_ROOT_ZNODE_FOR_PATH = "Recreated the root znode for path: ";
     private static final String MSG_ZK_MAY_BE_HACKED = "A root znode was deleted unexpected!! ZK may be hacked!!";
@@ -129,7 +130,7 @@ public class ZooKeeperManager implements DistributedLockManager {
         try {
             lockUuidBytes = this.getData(path);
         } catch (ZkServerConnectionException e) {
-            printOrLog(MSG_UNABLE_TO_DELETE_ZNODE + path, e);
+            printOrLogError(MSG_UNABLE_TO_DELETE_ZNODE + path, e);
         }
         if (isPersistentLockMode() || (isNotPersistentLockMode() && isLockOwnedByThisThread(lockUuidBytes))) {
             zk.delete(path, -1);
@@ -163,7 +164,7 @@ public class ZooKeeperManager implements DistributedLockManager {
                             try {
                                 handleException(path, e);
                             } catch (ZkServerConnectionException e1) {
-                                printOrLog(path + COMMER + e1.getLocalizedMessage(), e1);
+                                printOrLogError(path + COMMER + e1.getLocalizedMessage(), e1);
                             }
                         }
                     }
@@ -179,15 +180,15 @@ public class ZooKeeperManager implements DistributedLockManager {
         if (e instanceof KeeperException) {
             handleKeeperException(path, e);
         } else if (e instanceof InterruptedException) {
-            printOrLog(MSG_UNEXPECTED_EXCEPTION, e);
+            printOrLogError(MSG_UNEXPECTED_EXCEPTION, e);
             Thread.currentThread().interrupt();
         }
 
         if (debug) {
             if (e instanceof KeeperException) {
-                printOrLog(path + COMMER + e.getLocalizedMessage() + "," + ((KeeperException) e).code(), e);
+                printOrLogError(path + COMMER + e.getLocalizedMessage() + "," + ((KeeperException) e).code(), e);
             } else {
-                printOrLog(MSG_UNEXPECTED_EXCEPTION, e);
+                printOrLogError(MSG_UNEXPECTED_EXCEPTION, e);
             }
         } else {
             if (e instanceof KeeperException) {
@@ -195,10 +196,10 @@ public class ZooKeeperManager implements DistributedLockManager {
                 // if it is node exists exception, no need to print logs because it is a very
                 // normal case to fail to get lock
                 if (!code.equals(Code.NODEEXISTS)) {
-                    printOrLog(path + COMMER + e.getLocalizedMessage(), e);
+                    printOrLogError(path + COMMER + e.getLocalizedMessage(), e);
                 }
             } else {
-                printOrLog(MSG_UNEXPECTED_EXCEPTION, e);
+                printOrLogError(MSG_UNEXPECTED_EXCEPTION, e);
             }
         }
     }
@@ -206,8 +207,7 @@ public class ZooKeeperManager implements DistributedLockManager {
     private void handleKeeperException(String path, Exception e) throws ZkServerConnectionException {
         KeeperException ke = (KeeperException) e;
         if (isConnectionOrSessionIssue(ke)) {
-            printOrLog(MSG_ZOO_KEEPER_CONNECTION_SESSION_IS_BROKEN, MSG_TRYING_TO_RECONNECT_TO_ZOO_KEEPER_SERVER,
-                    ke);
+            printOrLog(MSG_ZOO_KEEPER_CONNECTION_SESSION_IS_BROKEN, MSG_TRYING_TO_RECONNECT_TO_ZOO_KEEPER_SERVER, ke);
             int retry = 0;
             synchronized (this) {
                 while (retry < this.clientConnectCount && this.zk.getState() != States.CONNECTED) {
@@ -223,14 +223,18 @@ public class ZooKeeperManager implements DistributedLockManager {
                 handleException(path, e1);
             }
         } else if (isNoAuthIssue(ke)) {
-            printOrLog(MSG_UNEXPECTED_NO_AUTH_EXCEPTION_IS_FOUND_FOR_PATH + path, ke);
+            printOrLogError(MSG_UNEXPECTED_NO_AUTH_EXCEPTION_IS_FOUND_FOR_PATH + path, ke);
             initZkAuth();
-        } else {
-            printOrLog(MSG_UNHANDLED_KEEPER_EXCEPTION_IS_FOUND, e);
+        } else if (isNodeExistsIssue(ke)) {
+            printOrLogWarn(MSG_NODE_EXISTS + path, ke);
+        }
+        else {
+            printOrLogError(MSG_UNHANDLED_KEEPER_EXCEPTION_IS_FOUND, e);
         }
     }
 
-    private void createZnodeAndRegister(String path) throws ZkServerConnectionException, KeeperException, InterruptedException{
+    private void createZnodeAndRegister(String path)
+            throws ZkServerConnectionException, KeeperException, InterruptedException {
         if (path.startsWith(getServerLockRootPath())) {
             createNodeIfNotExist(ZkLockConstant.SERVER_REGISTER_ROOT, getClassNameBytes());
             registerServerAddress();
@@ -273,20 +277,14 @@ public class ZooKeeperManager implements DistributedLockManager {
                 result = waitAndGetZnode(lock, path, timeout);
             }
         } finally {
-            this.timeToWait.set(null);
-            this.startTime.set(null);
+            this.timeToWait.remove();
+            this.startTime.remove();
         }
         return result != null;
     }
 
     private boolean unlockByPath(String path) throws ZkServerConnectionException {
-        boolean success = false;
-        try {
-            success = doDeleteZnode(path);
-        } catch (KeeperException | InterruptedException e) {
-            handleException(path, e);
-        }
-        return success;
+        return deleteNodeIfExist(path);
     }
 
     private void wait(Lock lock) throws ZkServerConnectionException {
@@ -397,6 +395,8 @@ public class ZooKeeperManager implements DistributedLockManager {
                 this.zk.close();
             } catch (InterruptedException e) {
                 handleException("ZooKeeperManager.destry()", e);
+            } finally {
+                this.threadUuidBytesHolder.remove();
             }
         }
     }
@@ -529,9 +529,10 @@ public class ZooKeeperManager implements DistributedLockManager {
                     syserrOrLog(MSG_ZK_SESSION_EXPIRED_NOW_REBUILDING);
                     try {
                         init();
+                        connectedLatch.countDown();
                         sysoutOrLog(MSG_ZK_REBUILD_SUCCESSFULLY);
                     } catch (ZkServerConnectionException e) {
-                        printOrLog(MSG_FAIL_TO_REBUILD_ZK_CLIENT_FOR_EVENT + event.toString(), e);
+                        printOrLogError(MSG_FAIL_TO_REBUILD_ZK_CLIENT_FOR_EVENT + event.toString(), e);
                     }
                 }
             }
@@ -608,7 +609,7 @@ public class ZooKeeperManager implements DistributedLockManager {
         return success;
     }
 
-    private boolean registerApp() throws ZkServerConnectionException, InterruptedException  {
+    private boolean registerApp() throws ZkServerConnectionException, InterruptedException {
         return createNodeIfNotExist(getAppLockRootPath(), appName.getBytes());
     }
 
@@ -631,7 +632,7 @@ public class ZooKeeperManager implements DistributedLockManager {
                     try {
                         handleException(ZkLockConstant.DEBUG, e);
                     } catch (ZkServerConnectionException zkServerConnExeption) {
-                        printOrLog(getConfigPath(ZkLockConstant.DEBUG) + COMMER
+                        printOrLogError(getConfigPath(ZkLockConstant.DEBUG) + COMMER
                                 + zkServerConnExeption.getLocalizedMessage(), zkServerConnExeption);
                     }
                 }
@@ -645,7 +646,7 @@ public class ZooKeeperManager implements DistributedLockManager {
                     try {
                         handleException(ZkLockConstant.DEBUG, e);
                     } catch (ZkServerConnectionException zkServerConnExeption) {
-                        printOrLog(getConfigPath(ZkLockConstant.DEBUG) + COMMER
+                        printOrLogError(getConfigPath(ZkLockConstant.DEBUG) + COMMER
                                 + zkServerConnExeption.getLocalizedMessage(), zkServerConnExeption);
                     }
                 }
@@ -782,11 +783,20 @@ public class ZooKeeperManager implements DistributedLockManager {
         }
     }
 
-    private void printOrLog(String errMsg, Exception e) {
+    private void printOrLogError(String errMsg, Exception e) {
         if (LOGGER != null) {
             LOGGER.error(errMsg, e);
         } else {
             syserr(errMsg);
+            e.printStackTrace();
+        }
+    }
+
+    private void printOrLogWarn(String errMsg, Exception e) {
+        if (LOGGER != null) {
+            LOGGER.warn(errMsg, e);
+        } else {
+            sysout(errMsg);
             e.printStackTrace();
         }
     }
@@ -801,5 +811,9 @@ public class ZooKeeperManager implements DistributedLockManager {
 
     private boolean isConnectionOrSessionIssue(KeeperException ke) {
         return Code.CONNECTIONLOSS == ke.code() || Code.SESSIONEXPIRED == ke.code() || Code.SESSIONMOVED == ke.code();
+    }
+
+    private boolean isNodeExistsIssue(KeeperException ke) {
+        return Code.NODEEXISTS == ke.code();
     }
 }
