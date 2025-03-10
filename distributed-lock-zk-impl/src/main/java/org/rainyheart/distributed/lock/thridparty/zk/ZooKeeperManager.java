@@ -212,6 +212,7 @@ public class ZooKeeperManager implements DistributedLockManager {
             synchronized (this) {
                 while (retry < this.clientConnectCount && this.zk.getState() != States.CONNECTED) {
                     this.init();
+                    retry++;
                 }
             }
         } else if (isNoNodeIssue(ke)) {
@@ -397,6 +398,9 @@ public class ZooKeeperManager implements DistributedLockManager {
                 handleException("ZooKeeperManager.destry()", e);
             } finally {
                 this.threadUuidBytesHolder.remove();
+                this.lockMode.remove();
+                this.startTime.remove();
+                this.timeToWait.remove();
             }
         }
     }
