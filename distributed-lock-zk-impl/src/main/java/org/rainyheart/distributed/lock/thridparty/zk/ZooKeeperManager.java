@@ -28,15 +28,14 @@ import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.data.Stat;
+import org.rainyheart.distributed.lock.api.DistributedLockManager;
+import org.rainyheart.distributed.lock.api.Lock;
+import org.rainyheart.distributed.lock.thridparty.zk.utils.ZkPasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import org.rainyheart.distributed.lock.api.DistributedLockManager;
-import org.rainyheart.distributed.lock.api.Lock;
-import org.rainyheart.distributed.lock.thridparty.zk.utils.ZkPasswordUtils;
 
 /**
  * The ZooKeeper Manager class.
@@ -66,6 +65,7 @@ public class ZooKeeperManager implements DistributedLockManager {
     private static final String MSG_TRYING_TO_RECONNECT_TO_ZOO_KEEPER_SERVER = "Trying to reconnect to ZooKeeper Server";
     private static final String MSG_ZOO_KEEPER_CONNECTION_SESSION_IS_BROKEN = "ZooKeeper Connection/Session is broken!!!";
     private static final String MSG_UNABLE_TO_DELETE_ZNODE = "Unable to delete Znode: ";
+    private static final String HOSTNAME_PATTERN = "^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))*$";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZooKeeperManager.class);
 
@@ -109,8 +109,8 @@ public class ZooKeeperManager implements DistributedLockManager {
             try {
                 this.interval = Long.parseLong(envInteval);
             } catch (Exception e) {
-                sysoutOrLog("Invalid environment variable " + ZkLockConstant.ENV_DISTRIBUTED_LOCK_THREAD_INTERVAL
-                        + ": " + envInteval);
+                sysoutOrLog("Invalid environment variable " + ZkLockConstant.ENV_DISTRIBUTED_LOCK_THREAD_INTERVAL + ": "
+                        + envInteval);
                 this.interval = 500l;
             }
         }
@@ -228,8 +228,7 @@ public class ZooKeeperManager implements DistributedLockManager {
             initZkAuth();
         } else if (isNodeExistsIssue(ke)) {
             printOrLogWarn(MSG_NODE_EXISTS + path, ke);
-        }
-        else {
+        } else {
             printOrLogError(MSG_UNHANDLED_KEEPER_EXCEPTION_IS_FOUND, e);
         }
     }
@@ -693,7 +692,30 @@ public class ZooKeeperManager implements DistributedLockManager {
     }
 
     public void setHostPort(String hostPort) {
-        this.hostPort = hostPort;
+        if (hostPort == null || hostPort.trim().isEmpty()) {
+            throw new IllegalArgumentException("hostPort cannot be null or empty");
+        }
+
+        String[] parts = hostPort.split(":");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("hostPort must be in format 'host:port'");
+        }
+
+        try {
+            int port = Integer.parseInt(parts[1]);
+            if (port <= 0 || port > 65535) {
+                throw new IllegalArgumentException("Port must be between 1 and 65535");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid port number", e);
+        }
+
+        String host = parts[0].trim();
+        if (!isValidHostname(host)) {
+            throw new IllegalArgumentException("Invalid hostname format");
+        }
+
+        this.hostPort = hostPort.trim();
     }
 
     public void setSessionTimeout(String sessionTimeout) {
@@ -819,5 +841,60 @@ public class ZooKeeperManager implements DistributedLockManager {
 
     private boolean isNodeExistsIssue(KeeperException ke) {
         return Code.NODEEXISTS == ke.code();
+    }
+
+    public boolean isValidHostname(String hostname) {
+        if (hostname == null || hostname.length() > 255) {
+            return false;
+        }
+
+        try {
+            if (isIpAddressFormat(hostname)) {
+                return isValidIpAddress(hostname);
+            }
+        } catch (NumberFormatException e) {
+            // DO NOTHING
+            ;
+        }
+
+        return hostname.matches(HOSTNAME_PATTERN);
+    }
+
+    private boolean isValidIpAddress(String ip) {
+        String[] parts = ip.split("\\.");
+
+        if (parts.length != 4) {
+            return false;
+        }
+
+        try {
+            for (String part : parts) {
+                int value = Integer.parseInt(part);
+                if (value < 0 || value > 255) {
+                    return false;
+                }
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isIpAddressFormat(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return false;
+        }
+
+        String[] parts = ip.split("\\.");
+
+        try {
+            for (String part : parts) {
+                Integer.parseInt(part);
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 }

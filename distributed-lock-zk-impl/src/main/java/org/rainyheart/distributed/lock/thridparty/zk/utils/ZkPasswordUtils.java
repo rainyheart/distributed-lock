@@ -8,6 +8,7 @@ public class ZkPasswordUtils {
 
     private ZkPasswordUtils() {
         super();
+        throw new AssertionError("Utility class - do not instantiate");
     }
 
     public static String getDigestUserPwd(String id) throws NoSuchAlgorithmException {

@@ -4,6 +4,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -90,7 +92,24 @@ public class DistributedLockAspect {
 
     @AfterThrowing(value = "pointcut()", throwing = "e")
     public void afterThrow(JoinPoint point, Exception e) throws DistributedLockException {
-        LOGGER.debug(e.getMessage(), e);
+        try {
+        LOGGER.error("Exception occurred in distributed lock operation", e);
+        Map<JoinPoint, Lock> lockMap = lockHolder.get();
+        if (lockMap != null) {
+            Lock lock = lockMap.get(point);
+            if (lock != null) {
+                try {
+                    api.unlock(lock);
+                } catch (Exception unlockEx) {
+                    LOGGER.error("Failed to unlock during exception handling", unlockEx);
+                }
+            }
+            lockMap.remove(point);
+        }
+    } finally {
+        // Ensure ThreadLocal is always cleaned up
+        lockHolder.remove();
+    }
     }
 
     private boolean lock(Lock lock, long timeout) throws DistributedLockException {
@@ -99,5 +118,10 @@ public class DistributedLockAspect {
         } else {
             return api.tryLock(lock);
         }
+    }
+    
+    @PreDestroy
+    public void cleanup() {
+        lockHolder.remove();
     }
 }
