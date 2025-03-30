@@ -42,8 +42,8 @@
         <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
 
         <!-- Project Internal Modules Versions -->
-        <distributed-lock-api.version>1.1.0</distributed-lock-api.version>
-        <distributed-lock-zk-impl.version>1.1.0</distributed-lock-zk-impl.version>
+        <distributed-lock-api.version>1.1.1</distributed-lock-api.version>
+        <distributed-lock-zk-impl.version>1.1.1</distributed-lock-zk-impl.version>
 
         <!-- 3pp versions -->
         <spring.version>5.3.18</spring.version>
