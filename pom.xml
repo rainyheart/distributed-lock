@@ -31,8 +31,8 @@
 
     <modules>
         <module>distributed-lock-api</module>
-        <module>distributed-lock-api-facade</module>
         <module>distributed-lock-zk-impl</module>
+        <module>distributed-lock-api-facade</module>
     </modules>
 
     <properties>
@@ -149,7 +149,6 @@
                 <version>${fastjson.version}</version>
                 <scope>test</scope>
             </dependency>
-
 
             <!-- Mock dependency test scope only -->
             <dependency>
@@ -401,10 +400,12 @@
         </pluginManagement>
 
         <plugins>
-            <!-- <plugin>
+            <!-- 
+            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-            </plugin> -->
+            </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
