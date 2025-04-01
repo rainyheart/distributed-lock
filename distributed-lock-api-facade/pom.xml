@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.rainyheart</groupId>
 		<artifactId>distributed-lock-projects</artifactId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</parent>
     <artifactId>distributed-lock-api-facade</artifactId>
     <name>distributed-lock-api-facade</name>

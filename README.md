@@ -12,12 +12,12 @@ Add below 2 dependency to your project pom.xml file, please refer to the release
 <dependency>
     <groupId>org.rainyheart</groupId>
     <artifactId>distributed-lock-api</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
 </dependency>
 <dependency>
     <groupId>org.rainyheart</groupId>
     <artifactId>distributed-lock-zk-impl</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.1-SNAPSHOT</version>
 </dependency>
 ```
 
