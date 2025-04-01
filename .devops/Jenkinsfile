@@ -1,0 +1,45 @@
+
+pipeline {
+  agent {
+    label 'host'
+  }
+  environment {
+        APP_NAME="distributed-lock"
+        JAVA_TOOL_OPTIONS = '-Duser.home=/var/maven'  // no need to change, use to set inside maven docker
+  }
+  stages {
+    stage('BUILD') {
+      agent {
+        docker {
+          image 'maven:3.6.3-jdk-8' 
+          args '--network=host -e MAVEN_CONFIG=/var/maven/.m2 -v /home/jenkins/.m2:/var/maven/.m2' 
+          label 'host'
+          reuseNode true
+        }
+      }
+      steps {
+        sh 'mvn clean deploy -U -e -Dmaven.test.skip=true'
+      }
+      
+    }
+    stage('TEST') {
+      agent {
+        docker {
+          image 'maven:3.6.3-jdk-8' 
+          args '--network=host -e MAVEN_CONFIG=/var/maven/.m2 -v /home/jenkins/.m2:/var/maven/.m2' 
+          label 'host'
+          reuseNode true
+        }
+      }
+      steps {
+            sh 'mvn test -e'
+        }
+        post {
+          always {
+            //archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
+          }
+        }
+    }
+  }
+}
