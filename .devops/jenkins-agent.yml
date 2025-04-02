@@ -19,7 +19,7 @@ spec:
       mountPath: /root/.m2
   - name: jnlp
     image: jenkins/inbound-agent:jdk17
-    args: ['--secret=$(JENKINS_SECRET)', '--name=$(JENKINS_NAME)', '--url=${JENKINS_URL}/jnlpJars/agent.jar']
+    args: ['--url=${JENKINS_URL}/jnlpJars/agent.jar]
     env:
     - name: JENKINS_URL
       value: http://jenkins:8080
