@@ -2,7 +2,7 @@
 pipeline {
   agent {
       kubernetes {          
-          yamlFile 'jenkins-agent.yml'
+          yamlFile '.devops/jenkins-agent.yml'
       }
   }
   environment {
