@@ -1,7 +1,9 @@
 
 pipeline {
   agent {
-    label 'host'
+      kubernetes {          
+          yamlFile 'jenkins-agent.yml'
+      }
   }
   environment {
         APP_NAME="distributed-lock"
