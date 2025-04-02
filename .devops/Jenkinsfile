@@ -1,7 +1,8 @@
 
 pipeline {
   agent {
-      kubernetes {          
+      kubernetes {         
+          defaultContainer 'jnlp' 
           yamlFile '.devops/jenkins-agent.yml'
       }
   }
