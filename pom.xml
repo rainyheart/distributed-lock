@@ -56,7 +56,7 @@
         <mockito.version>1.10.19</mockito.version>
         <jackson.version>2.13.4</jackson.version>
         <fastjson.version>1.2.83</fastjson.version>
-        <tomcat.version>8.5.9</tomcat.version>
+        <tomcat.version>8.5.86</tomcat.version>
         <jacoco-version>0.8.4</jacoco-version>
         <maven-surefire-plugin>2.5</maven-surefire-plugin>
         <curator.version>2.12.0</curator.version>
