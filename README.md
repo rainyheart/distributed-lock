@@ -1,6 +1,17 @@
 # distributed-lock
 
-This is a open source project for distributed lock. I have implemented the Zookeeper implementation based on the distributed-lock-api project. Any contribution is welcome!
+This is an open-source project for distributed lock. I have implemented the Zookeeper implementation based on the distributed-lock-api project. Any contribution is welcome!
+
+## Documentation
+
+- [Configuration (English)](docs/en/configuration-en.md)
+- [Examples (English)](docs/en/examples-en.md)
+- [Performance Tuning (English)](docs/en/performance-tuning-en.md)
+- [Troubleshooting (English)](docs/en/troubleshooting-en.md)
+- [配置 (中文)](docs/zh/configuration-zh.md)
+- [示例 (中文)](docs/zh/examples-zh.md)
+- [性能调优 (中文)](docs/zh/performance-tuning-zh.md)
+- [故障排除 (中文)](docs/zh/troubleshooting-zh.md)
 
 ## How to use the distributed lock
 
