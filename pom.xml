@@ -49,7 +49,7 @@
         <spring.version>5.3.18</spring.version>
         <junit.version>4.13.1</junit.version>
         <slf4j.version>1.6.6</slf4j.version>
-        <hutool.version>5.0.6</hutool.version>
+        <hutool.version>5.8.12</hutool.version>
         <apache.zookeeper.version>3.4.14</apache.zookeeper.version>
         <hutool.version>4.1.1</hutool.version>
         <powermock.version>1.7.4</powermock.version>
